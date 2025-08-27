@@ -74,18 +74,19 @@ jobs:
               id: invoke
               shell: bash
               run: |
-                echo "${{ steps.prdata.outputs.result }}" > /tmp/prdata.json
-                PAYLOAD=$(jq -n --argjson pr "$(cat /tmp/prdata.json | sed 's/\\/\\\\/g')" '$pr')
-                echo "$PAYLOAD" > /tmp/pr_payload.json
+                # Directly write PR JSON to payload file
+                echo "${{ steps.prdata.outputs.result }}" > /tmp/pr_payload.json
 
+                # Invoke Lambda with the file as payload
                 aws lambda invoke \
-                  --function-name arn:aws:lambda:us-east-1:123456789012:function/pr-summarizer \
+                  --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
                   --cli-binary-format raw-in-base64-out \
                   --payload fileb:///tmp/pr_payload.json \
                   /tmp/lambda_response.json \
                   --region us-east-1
 
                 cat /tmp/lambda_response.json
+
             # - name: Parse Lambda response
             #   id: parse
             #   run: |
