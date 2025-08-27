@@ -70,10 +70,14 @@ jobs:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
             
-            - name: Invoke Lambda
+            - name: Invoke Lambda (sync) with PR payload
+              id: invoke
               shell: bash
               run: |
-                echo '${{ steps.prdata.outputs.result }}' > /tmp/pr_payload.json
+                echo "${{ steps.prdata.outputs.result }}" > /tmp/prdata.json
+                PAYLOAD=$(jq -n --argjson pr "$(cat /tmp/prdata.json | sed 's/\\/\\\\/g')" '$pr')
+                echo "$PAYLOAD" > /tmp/pr_payload.json
+
                 aws lambda invoke \
                   --function-name arn:aws:lambda:us-east-1:123456789012:function/pr-summarizer \
                   --cli-binary-format raw-in-base64-out \
