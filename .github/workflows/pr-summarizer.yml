@@ -69,13 +69,20 @@ jobs:
               with:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
+            
+            - name: Save PR payload to file safely
+              shell: bash
+              run: |
+                # Use a heredoc to safely write the JSON payload
+                cat <<EOF >/tmp/pr_payload.json
+                ${{ steps.prdata.outputs.result }}
+                EOF
+
+
             - name: Invoke Lambda safely with JSON payload
               id: invoke
               shell: bash
               run: |
-                # 1️⃣ Write complex JSON payload to a temporary file
-                echo "${{ steps.prdata.outputs.result }}" > /tmp/pr_payload.json
-
                 # 2️⃣ Call Lambda, passing the file as payload
                 aws lambda invoke \
                   --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
