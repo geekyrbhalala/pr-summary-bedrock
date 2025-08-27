@@ -71,7 +71,7 @@ jobs:
                 aws-region: us-east-1
 
             - name: Write PR payload to file
-              run: echo "${{ steps.prdata.outputs.result }}" | tee /tmp/pr_payload.json
+              run: echo '${{ steps.prdata.outputs.result }}' | tee /tmp/pr_payload.json
             
             - name: Invoke Lambda (sync) with PR payload
               id: invoke
