@@ -86,15 +86,6 @@ jobs:
 
                 cat /tmp/lambda_response.json
 
-            # - name: Save PR payload to file safely
-            #   shell: bash
-            #   run: |
-            #     # Use a heredoc to safely write the JSON payload
-            #     cat <<EOF >/tmp/pr_payload.json
-            #     ${{ steps.prdata.outputs.result }}
-            #     EOF
-
-
             # - name: Invoke Lambda safely with JSON payload
             #   id: invoke
             #   shell: bash
