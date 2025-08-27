@@ -71,12 +71,18 @@ jobs:
                 aws-region: us-east-1
             
             - name: Invoke Lambda (sync) with PR payload
-              id: invoke
+              id: invoke_lambda
               run: |
+                PAYLOAD=$(jq -n --argjson pr "$(<(echo '${{ steps.prdata.outputs.result }}' | sed 's/\\/\\\\/g'))' '$pr')
+                # Write payload to file
+                echo "$PAYLOAD" > /tmp/pr_payload.json
+                # Invoke Lambda (synchronous) - update function name to your Lambda ARN or name
                 aws lambda invoke \
                   --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
                   --cli-binary-format raw-in-base64-out \
-                  --payload "$(echo '${{ steps.prdata.outputs.result }}' | jq -c .)" /tmp/lambda_response.json
+                  --payload fileb:///tmp/pr_payload.json \
+                  /tmp/lambda_response.json \
+                  --region us-east-1
             # - name: Parse Lambda response
             #   id: parse
             #   run: |
