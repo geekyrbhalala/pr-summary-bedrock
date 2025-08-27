@@ -69,15 +69,14 @@ jobs:
               with:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
-            
-            - name: Invoke Lambda (sync) with PR payload
+            - name: Invoke Lambda safely with JSON payload
               id: invoke
               shell: bash
               run: |
-                # Directly write PR JSON to payload file
+                # 1️⃣ Write complex JSON payload to a temporary file
                 echo "${{ steps.prdata.outputs.result }}" > /tmp/pr_payload.json
 
-                # Invoke Lambda with the file as payload
+                # 2️⃣ Call Lambda, passing the file as payload
                 aws lambda invoke \
                   --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
                   --cli-binary-format raw-in-base64-out \
@@ -85,6 +84,7 @@ jobs:
                   /tmp/lambda_response.json \
                   --region us-east-1
 
+                # 3️⃣ Output response for debugging
                 cat /tmp/lambda_response.json
 
             # - name: Parse Lambda response
