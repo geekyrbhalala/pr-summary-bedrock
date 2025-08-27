@@ -76,7 +76,7 @@ jobs:
                 aws lambda invoke \
                   --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
                   --cli-binary-format raw-in-base64-out \
-                  --payload '${{ steps.prdata.outputs.result }}' /tmp/lambda_response.json
+                  --payload "$(echo '${{ steps.prdata.outputs.result }}' | jq -c .)" /tmp/lambda_response.json
             # - name: Parse Lambda response
             #   id: parse
             #   run: |
