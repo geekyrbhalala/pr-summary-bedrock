@@ -22,46 +22,46 @@ jobs:
               with:
                 python-version: '3.x'
 
-            # - name: Gather PR data
-            #   id: prdata
-            #   uses: actions/github-script@v7
-            #   with:
-            #     github-token: ${{ secrets.GITHUB_TOKEN }}
-            #     script: |
-            #         const pr = await github.rest.pulls.get({
-            #           owner: context.repo.owner,
-            #           repo: context.repo.repo,
-            #           pull_number: context.payload.pull_request.number
-            #         });
+            - name: Gather PR data
+              id: prdata
+              uses: actions/github-script@v7
+              with:
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+                script: |
+                    const pr = await github.rest.pulls.get({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.payload.pull_request.number
+                    });
 
-            #         // Get commits
-            #         const commits = await github.rest.pulls.listCommits({
-            #           owner: context.repo.owner,
-            #           repo: context.repo.repo,
-            #           pull_number: context.payload.pull_request.number
-            #         });
+                    // Get commits
+                    const commits = await github.rest.pulls.listCommits({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.payload.pull_request.number
+                    });
 
-            #         // Get PR diff (raw) - using mediaType to accept diff
-            #         const diffResponse = await github.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-            #           owner: context.repo.owner,
-            #           repo: context.repo.repo,
-            #           pull_number: context.payload.pull_request.number,
-            #           headers: { accept: "application/vnd.github.v3.diff" }
-            #         });
+                    // Get PR diff (raw) - using mediaType to accept diff
+                    const diffResponse = await github.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.payload.pull_request.number,
+                      headers: { accept: "application/vnd.github.v3.diff" }
+                    });
 
-            #         // Build payload (truncate diff if huge)
-            #         const diff = diffResp.length > 25000 ? diffResp.slice(0,25000) + "\n\n[TRUNCATED]" : diffResp;
+                    // Build payload (truncate diff if huge)
+                    const diff = diffResponse.length > 25000 ? diffResponse.slice(0,25000) + "\n\n[TRUNCATED]" : diffResponse;
 
-            #         return {
-            #         number: context.payload.pull_request.number,
-            #         title: pr.data.title,
-            #         body: pr.data.body || "",
-            #         author: pr.data.user.login,
-            #         head_ref: pr.data.head.ref,
-            #         base_ref: pr.data.base.ref,
-            #         commits: commits.data.map(c => ({sha: c.sha, message: c.commit.message, author: c.commit.author?.name || c.author?.login})),
-            #         diff: diff
-            #         };
+                    return {
+                      number: context.payload.pull_request.number,
+                      title: pr.data.title,
+                      body: pr.data.body || "",
+                      author: pr.data.user.login,
+                      head_ref: pr.data.head.ref,
+                      base_ref: pr.data.base.ref,
+                      commits: commits.data.map(c => ({sha: c.sha, message: c.commit.message, author: c.commit.author?.name || c.author?.login})),
+                      diff: diff
+                    };
 
             # - name: Configure AWS credentials
             #   uses: aws-actions/configure-aws-credentials@v2
