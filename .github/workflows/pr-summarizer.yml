@@ -50,9 +50,6 @@ jobs:
                       headers: { accept: "application/vnd.github.v3.diff" }
                     });
 
-                    // Build payload (truncate diff if huge)
-                    const diff = diffResponse.length > 25000 ? diffResponse.data.slice(0,25000) + "\n\n[TRUNCATED]" : diffResponse.data;
-
                     return {
                       number: context.payload.pull_request.number,
                       title: pr.data.title,
@@ -69,21 +66,21 @@ jobs:
               with:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
-            - name: Test Lambda with simple payload
+            - name: Invoke Lambda (sync) with PR payload
+              id: invoke
               shell: bash
               run: |
-                # Create a simple JSON payload
-                echo '{"test_key": "Hello Lambda!"}' > /tmp/simple_payload.json
+                # Directly write PR JSON to payload file
+                echo "${{ steps.prdata.outputs.result }}" > /tmp/pr_payload.json
 
-                # Invoke Lambda
+                # Invoke Lambda with the file as payload
                 aws lambda invoke \
-                  --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
+                  --function-name arn:aws:lambda:us-east-1:123456789012:function/pr-summarizer \
                   --cli-binary-format raw-in-base64-out \
-                  --payload fileb:///tmp/simple_payload.json \
+                  --payload fileb:///tmp/pr_payload.json \
                   /tmp/lambda_response.json \
                   --region us-east-1
 
-                # Print the Lambda response
                 cat /tmp/lambda_response.json
 
             # - name: Save PR payload to file safely
