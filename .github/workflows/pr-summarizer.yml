@@ -69,16 +69,14 @@ jobs:
               with:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
-
-            - name: Write PR payload to file
-              run: echo '${{ steps.prdata.outputs.result }}' | tee /tmp/pr_payload.json
             
             - name: Invoke Lambda (sync) with PR payload
               id: invoke
               run: |
                 aws lambda invoke \
                   --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
-                  --payload fileb:///tmp/pr_payload.json /tmp/lambda_response.json
+                  --cli-binary-format raw-in-base64-out \
+                  --payload '${{ steps.prdata.outputs.result }}' /tmp/lambda_response.json
             # - name: Parse Lambda response
             #   id: parse
             #   run: |
