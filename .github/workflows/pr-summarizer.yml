@@ -69,46 +69,30 @@ jobs:
               with:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
-            - name: Invoke Lambda (sync) with PR payload
+
+            - name: Save PR payload to file safely
+              shell: bash
+              run: |
+                # Use a heredoc to safely write the JSON payload
+                cat <<EOF >/tmp/pr_payload.json
+                ${{ steps.prdata.outputs.result }}
+                EOF
+
+
+            - name: Invoke Lambda safely with JSON payload
               id: invoke
               shell: bash
               run: |
-                # Directly write PR JSON to payload file
-                echo "${{ steps.prdata.outputs.result }}" > /tmp/pr_payload.json
-
-                # Invoke Lambda with the file as payload
+                # 2️⃣ Call Lambda, passing the file as payload
                 aws lambda invoke \
-                  --function-name arn:aws:lambda:us-east-1:123456789012:function/pr-summarizer \
+                  --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
                   --cli-binary-format raw-in-base64-out \
                   --payload fileb:///tmp/pr_payload.json \
                   /tmp/lambda_response.json \
                   --region us-east-1
 
+                # 3️⃣ Output response for debugging
                 cat /tmp/lambda_response.json
-
-            # - name: Save PR payload to file safely
-            #   shell: bash
-            #   run: |
-            #     # Use a heredoc to safely write the JSON payload
-            #     cat <<EOF >/tmp/pr_payload.json
-            #     ${{ steps.prdata.outputs.result }}
-            #     EOF
-
-
-            # - name: Invoke Lambda safely with JSON payload
-            #   id: invoke
-            #   shell: bash
-            #   run: |
-            #     # 2️⃣ Call Lambda, passing the file as payload
-            #     aws lambda invoke \
-            #       --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_ARN }} \
-            #       --cli-binary-format raw-in-base64-out \
-            #       --payload fileb:///tmp/pr_payload.json \
-            #       /tmp/lambda_response.json \
-            #       --region us-east-1
-
-            #     # 3️⃣ Output response for debugging
-            #     cat /tmp/lambda_response.json
 
             # - name: Parse Lambda response
             #   id: parse
