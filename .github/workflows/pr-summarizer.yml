@@ -50,6 +50,9 @@ jobs:
                       headers: { accept: "application/vnd.github.v3.diff" }
                     });
 
+                    // Build payload (truncate diff if huge)
+                    const diff = diffResponse.data;
+
                     return {
                       number: context.payload.pull_request.number,
                       title: pr.data.title,
