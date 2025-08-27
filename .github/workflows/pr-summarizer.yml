@@ -68,10 +68,6 @@ jobs:
               with:
                 role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                 aws-region: us-east-1
-            - name: Additional steps
-              run: |
-                # Your commands that require AWS credentials
-                aws sts get-caller-identity 
 
             # - name: Invoke Lambda (sync) with PR payload
             #   id: invoke
