@@ -62,14 +62,16 @@ jobs:
                       commits: commits.data.map(c => ({sha: c.sha, message: c.commit.message, author: c.commit.author?.name || c.author?.login})),
                       diff: diff
                     };
-            - run: echo "${{ steps.prdata.outputs.result }}"
 
-            # - name: Configure AWS credentials
-            #   uses: aws-actions/configure-aws-credentials@v2
-            #   with:
-            #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            #     aws-region: us-east-1
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@main
+              with:
+                role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+                aws-region: us-east-1
+            - name: Additional steps
+              run: |
+                # Your commands that require AWS credentials
+                aws sts get-caller-identity 
 
             # - name: Invoke Lambda (sync) with PR payload
             #   id: invoke
